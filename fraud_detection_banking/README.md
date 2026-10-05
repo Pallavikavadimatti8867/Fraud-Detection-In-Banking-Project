@@ -142,22 +142,3 @@ python app.py
 
 ### Why Accuracy is Insufficient (Viva Voce Key Topic)
 In banking datasets, fraudulent transactions typically comprise only 5% to 15% of total volume. A dummy model that classifies every transaction as "Legitimate" would achieve **85% - 95% accuracy** while intercepting **0% of fraud**. Therefore, model evaluation must prioritize **Precision**, **Recall**, **F1-Score**, and **ROC-AUC**.
-
----
-
-## 6. Project Presentation & Viva Questions & Answers
-
-1. **Q: How does the model handle imbalanced classes?**
-   *A:* Using `class_weight='balanced'`, which assigns higher penalty weights to the minority fraud class during loss calculation, preventing the trees from favoring the majority class.
-
-2. **Q: What feature engineering was performed?**
-   *A:* Extracted transaction hour to flag late-night spikes (1 AM - 4 AM), computed transaction frequency surges, flagged high-risk origin IPs (e.g. Tor/Proxy), and identified anomalous device signatures (rooted phones, headless bots).
-
-3. **Q: What is the risk score formula?**
-   *A:* The risk score scales the calibrated model predicted probability $P(\text{fraud})$ from 0 to 100:
-   - **0 - 34:** Low Risk (Legitimate, Auto-Approved)
-   - **35 - 69:** Medium Risk (Suspicious, Step-Up 2FA / Manual Review)
-   - **70 - 100:** High Risk (Fraudulent, Automated Block & Analyst Queue)
-
-4. **Q: How is security ensured in Flask?**
-   *A:* Cryptographic password hashing (`werkzeug.security`), session-based cookies, parameter binding in SQLite queries to eliminate SQL injection, and server-side input validation.
