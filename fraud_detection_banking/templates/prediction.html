@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Live ML Fraud Risk Prediction{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Form Column -->
+    <div class="col-12 col-lg-7">
+        <div class="card bg-navy border-secondary p-4 shadow-sm">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-cpu-fill fs-3 text-warning"></i>
+                <div>
+                    <h4 class="fw-bold text-white mb-0">Transaction Risk Scoring Engine</h4>
+                    <p class="text-secondary small mb-0">Input transaction metadata to execute real-time ML risk inference</p>
+                </div>
+            </div>
+
+            <form action="{{ url_for('predict') }}" method="POST">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small text-secondary">Transaction ID</label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary font-monospace" name="transaction_id" value="{{ form.transaction_id or 'TXN-948210' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small text-secondary">Customer Account ID</label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary font-monospace" name="customer_id" value="{{ form.customer_id or 'CUST-1042' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small text-secondary">Transaction Amount ($ USD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary">$</span>
+                            <input type="number" step="0.01" class="form-control bg-dark text-light border-secondary fw-bold" name="amount" value="{{ form.amount or '2450.00' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small text-secondary">Transaction Channel / Type</label>
+                        <select class="form-select bg-dark text-light border-secondary" name="transaction_type">
+                            <option value="Online Checkout" {% if form.transaction_type == 'Online Checkout' %}selected{% endif %}>Online Checkout</option>
+                            <option value="Wire Transfer" {% if form.transaction_type == 'Wire Transfer' %}selected{% endif %}>Wire Transfer</option>
+                            <option value="POS Swipe" {% if form.transaction_type == 'POS Swipe' %}selected{% endif %}>POS Swipe</option>
+                            <option value="ATM Withdrawal" {% if form.transaction_type == 'ATM Withdrawal' %}selected{% endif %}>ATM Withdrawal</option>
+                            <option value="Mobile Banking" {% if form.transaction_type == 'Mobile Banking' %}selected{% endif %}>Mobile Banking</option>
+                            <option value="Crypto Exchange" {% if form.transaction_type == 'Crypto Exchange' %}selected{% endif %}>Crypto Exchange</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small text-secondary">Merchant Category</label>
+                        <select class="form-select bg-dark text-light border-secondary" name="merchant_category">
+                            <option value="Electronics">Electronics</option>
+                            <option value="Jewelry & Luxury">Jewelry & Luxury (High Risk)</option>
+                            <option value="Crypto & Gambling">Crypto & Gambling (High Risk)</option>
+                            <option value="Grocery & Supermarket">Grocery & Supermarket</option>
+                            <option value="Travel & Airlines">Travel & Airlines</option>
+                            <option value="Utilities & Bills">Utilities & Bills</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small text-secondary">Customer Device Fingerprint</label>
+                        <select class="form-select bg-dark text-light border-secondary" name="device_type">
+                            <option value="Known Mobile (iOS)">Known Mobile (iOS)</option>
+                            <option value="Known Mobile (Android)">Known Mobile (Android)</option>
+                            <option value="Known Desktop (Chrome)">Known Desktop (Chrome)</option>
+                            <option value="New Unrecognized Device">New Unrecognized Device</option>
+                            <option value="Rooted/Jailbroken Phone">Rooted/Jailbroken Phone (Anomalous)</option>
+                            <option value="Headless Browser / Bot">Headless Browser / Bot (Botnet)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small text-secondary">Origin Location / IP Geolocation</label>
+                        <select class="form-select bg-dark text-light border-secondary" name="location">
+                            <option value="New York, US">New York, US (Domestic)</option>
+                            <option value="London, UK">London, UK</option>
+                            <option value="Toronto, CA">Toronto, CA</option>
+                            <option value="Tokyo, JP">Tokyo, JP</option>
+                            <option value="Lagos, NG">Lagos, NG (Cross-border High Risk)</option>
+                            <option value="Moscow, RU">Moscow, RU (Cross-border High Risk)</option>
+                            <option value="High-Risk IP Proxy">Tor Exit Node / High-Risk IP Proxy</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small text-secondary">Account Age (Months)</label>
+                        <input type="number" class="form-control bg-dark text-light border-secondary" name="account_age" value="{{ form.account_age or '24' }}">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label small text-secondary">Past 30-Day Txs</label>
+                        <input type="number" class="form-control bg-dark text-light border-secondary" name="previous_transactions" value="{{ form.previous_transactions or '18' }}">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label small text-secondary">Past Fraud Strikes</label>
+                        <input type="number" class="form-control bg-dark text-light border-secondary" name="previous_fraud_count" value="{{ form.previous_fraud_count or '0' }}">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label small text-secondary">Failed Auth Attempts</label>
+                        <input type="number" class="form-control bg-dark text-light border-secondary" name="failed_transactions" value="{{ form.failed_transactions or '0' }}">
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input bg-dark border-secondary" type="checkbox" name="save_to_db" id="saveDb" checked>
+                            <label class="form-check-label text-secondary small" for="saveDb">
+                                Automatically log and persist transaction record in database
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-warning px-4 fw-bold">
+                        <i class="bi bi-lightning-charge-fill me-1"></i> Run ML Risk Analysis
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="loadHighRiskPreset()">
+                        Load High-Risk Sample
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="loadLegitPreset()">
+                        Load Legitimate Sample
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Prediction Output Column -->
+    <div class="col-12 col-lg-5">
+        <div class="card bg-navy border-secondary h-100 p-4">
+            <h5 class="fw-bold text-white mb-3">Model Inference Result</h5>
+            
+            {% if result %}
+            <div class="text-center p-4 rounded-4 mb-3 border {% if result.risk_level == 'High' %}bg-danger bg-opacity-10 border-danger{% elif result.risk_level == 'Medium' %}bg-warning bg-opacity-10 border-warning{% else %}bg-success bg-opacity-10 border-success{% endif %}">
+                <span class="text-secondary text-uppercase small fw-bold">Predicted Classification</span>
+                <h2 class="display-6 fw-bold mb-1 {% if result.risk_level == 'High' %}text-danger{% elif result.risk_level == 'Medium' %}text-warning{% else %}text-success{% endif %}">
+                    {{ result.prediction|upper }}
+                </h2>
+                <div class="badge {% if result.risk_level == 'High' %}bg-danger{% elif result.risk_level == 'Medium' %}bg-warning text-dark{% else %}bg-success{% endif %} px-3 py-1 fs-6">
+                    Risk Level: {{ result.risk_level|upper }}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="small text-secondary fw-semibold">Fraud Probability</span>
+                    <span class="small fw-bold text-white">{{ result.probability_percent }}</span>
+                </div>
+                <div class="progress bg-dark" style="height: 10px;">
+                    <div class="progress-bar {% if result.risk_level == 'High' %}bg-danger{% elif result.risk_level == 'Medium' %}bg-warning{% else %}bg-success{% endif %}" 
+                         style="width: {{ result.risk_score }}%;"></div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="small text-secondary fw-semibold">Risk Score Metric</span>
+                    <span class="small fw-bold text-white">{{ result.risk_score }} / 100</span>
+                </div>
+            </div>
+
+            <div class="card bg-dark border-secondary p-3 mb-3">
+                <h6 class="small fw-bold text-warning mb-1"><i class="bi bi-info-circle me-1"></i> Decision Recommendation</h6>
+                <p class="small text-light mb-0">{{ result.recommendation }}</p>
+            </div>
+
+            <!-- Disclaimer as requested in project brief -->
+            <div class="alert alert-secondary small py-2 mb-0 border-secondary bg-dark text-secondary">
+                <i class="bi bi-shield-exclamation text-warning me-1"></i>
+                <strong>Compliance Note:</strong> This model output is a machine-learning statistical risk prediction that supports human review. It does not legally guarantee fraud.
+            </div>
+
+            {% else %}
+            <div class="h-100 d-flex flex-column justify-content-center align-items-center text-center p-4 text-secondary">
+                <i class="bi bi-shield-check display-3 text-secondary opacity-50 mb-3"></i>
+                <h6 class="text-white">Awaiting Input</h6>
+                <p class="small">Fill the transaction parameters on the left and submit to trigger Random Forest inference.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function loadHighRiskPreset() {
+    document.querySelector('input[name="amount"]').value = "7850.00";
+    document.querySelector('select[name="transaction_type"]').value = "Wire Transfer";
+    document.querySelector('select[name="merchant_category"]').value = "Crypto & Gambling";
+    document.querySelector('select[name="device_type"]').value = "Headless Browser / Bot";
+    document.querySelector('select[name="location"]').value = "High-Risk IP Proxy";
+    document.querySelector('input[name="failed_transactions"]').value = "3";
+    document.querySelector('input[name="previous_fraud_count"]').value = "1";
+    document.querySelector('input[name="account_age"]').value = "1";
+}
+function loadLegitPreset() {
+    document.querySelector('input[name="amount"]').value = "45.50";
+    document.querySelector('select[name="transaction_type"]').value = "POS Swipe";
+    document.querySelector('select[name="merchant_category"]').value = "Grocery & Supermarket";
+    document.querySelector('select[name="device_type"]').value = "Known Mobile (iOS)";
+    document.querySelector('select[name="location"]').value = "New York, US";
+    document.querySelector('input[name="failed_transactions"]').value = "0";
+    document.querySelector('input[name="previous_fraud_count"]').value = "0";
+    document.querySelector('input[name="account_age"]').value = "36";
+}
+</script>
+{% endblock %}

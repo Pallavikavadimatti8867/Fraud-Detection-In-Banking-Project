@@ -1,0 +1,6 @@
+{
+  "name": "AI-Based Fraud Detection in Banking",
+  "description": "Enterprise-grade machine learning fraud detection platform for banking transactions with real-time risk scoring, exploratory data analytics, and VS Code Python Flask project artifacts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

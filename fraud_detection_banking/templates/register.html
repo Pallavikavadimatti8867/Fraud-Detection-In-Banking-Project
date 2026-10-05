@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Security Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-75 py-4">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+        <div class="card bg-navy border-secondary shadow-lg rounded-4 p-4">
+            <div class="text-center mb-4">
+                <div class="d-inline-flex p-3 rounded-circle bg-primary bg-opacity-10 text-primary mb-2">
+                    <i class="bi bi-person-plus-fill fs-2"></i>
+                </div>
+                <h3 class="fw-bold text-white mb-1">Create Analyst Account</h3>
+                <p class="text-secondary small mb-0">Register for SentraBank Fraud Detection Console</p>
+            </div>
+
+            <form action="{{ url_for('register') }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label text-light small fw-semibold">Full Legal Name</label>
+                    <input type="text" class="form-control bg-dark text-light border-secondary" name="full_name" placeholder="Johnathan Doe" required>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-light small fw-semibold">Username / Staff ID</label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary" name="username" placeholder="jdoe_analyst" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-light small fw-semibold">Corporate Email</label>
+                        <input type="email" class="form-control bg-dark text-light border-secondary" name="email" placeholder="jdoe@sentrabank.com" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-light small fw-semibold">Role / Clearance</label>
+                    <select class="form-select bg-dark text-light border-secondary" name="role">
+                        <option value="Junior Fraud Analyst">Junior Fraud Analyst</option>
+                        <option value="Senior Fraud Analyst">Senior Fraud Analyst</option>
+                        <option value="Risk Operations Manager">Risk Operations Manager</option>
+                        <option value="Compliance Officer">Compliance Officer</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-light small fw-semibold">Master Password</label>
+                    <input type="password" class="form-control bg-dark text-light border-secondary" name="password" minlength="6" placeholder="Minimum 6 characters" required>
+                    <small class="text-secondary">Password will be hashed using PBKDF2:SHA256.</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                    <i class="bi bi-shield-check me-1"></i> Register Security Credentials
+                </button>
+            </form>
+
+            <div class="text-center mt-3">
+                <span class="text-secondary small">Already have credentials? </span>
+                <a href="{{ url_for('login') }}" class="text-warning text-decoration-none small fw-semibold">Return to Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

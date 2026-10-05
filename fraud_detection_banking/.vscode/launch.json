@@ -1,0 +1,47 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Run Fraud Detection Flask App (F5)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "flask",
+      "env": {
+        "FLASK_APP": "app.py",
+        "FLASK_DEBUG": "1",
+        "PORT": "5000"
+      },
+      "args": [
+        "run",
+        "--host=0.0.0.0",
+        "--port=5000"
+      ],
+      "jinja": true,
+      "justMyCode": true
+    },
+    {
+      "name": "Python: Run Directly (python app.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Python: Train Machine Learning Model (train_model.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/train_model.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Python: Initialize Database (database/init_db.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/database/init_db.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}

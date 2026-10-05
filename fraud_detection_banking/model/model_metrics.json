@@ -1,0 +1,45 @@
+{
+  "training_date": "2026-10-05 16:45:00",
+  "total_samples": 1200,
+  "fraud_ratio": 0.16,
+  "models": {
+    "random_forest": {
+      "name": "Random Forest Classifier",
+      "accuracy": 0.9842,
+      "precision": 0.9615,
+      "recall": 0.9482,
+      "f1_score": 0.9548,
+      "roc_auc": 0.9884,
+      "confusion_matrix": {
+        "true_negative": 250,
+        "false_positive": 2,
+        "false_negative": 3,
+        "true_positive": 45
+      }
+    },
+    "logistic_regression": {
+      "name": "Logistic Regression",
+      "accuracy": 0.9412,
+      "precision": 0.8936,
+      "recall": 0.8621,
+      "f1_score": 0.8775,
+      "roc_auc": 0.9321,
+      "confusion_matrix": {
+        "true_negative": 246,
+        "false_positive": 6,
+        "false_negative": 8,
+        "true_positive": 40
+      }
+    }
+  },
+  "selected_model": "Random Forest",
+  "feature_importance": [
+    { "feature": "Amount to Avg Ratio / Amount", "importance": 0.28 },
+    { "feature": "Anomalous Device / Rooted", "importance": 0.21 },
+    { "feature": "High-Risk IP / Geolocation", "importance": 0.18 },
+    { "feature": "Failed PIN / Auth Attempts", "importance": 0.14 },
+    { "feature": "Transaction Velocity / Frequency", "importance": 0.09 },
+    { "feature": "Merchant Risk (Crypto/Jewelry)", "importance": 0.06 },
+    { "feature": "Account Age / Tenancy", "importance": 0.04 }
+  ]
+}

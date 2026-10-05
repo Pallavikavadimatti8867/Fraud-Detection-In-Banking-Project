@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Transaction Ledger & Audit Trail{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold text-white mb-0">Transaction Surveillance Ledger</h2>
+        <p class="text-secondary small mb-0">Showing {{ total_records }} stored transactions with ML risk audit scores</p>
+    </div>
+    <div>
+        <a href="{{ url_for('predict') }}" class="btn btn-warning btn-sm fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> New Transaction Test
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filter Controls -->
+<div class="card bg-navy border-secondary p-3 mb-4">
+    <form method="GET" action="{{ url_for('transactions') }}" class="row g-2 align-items-center">
+        <div class="col-12 col-md-4">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-dark border-secondary text-secondary">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control bg-dark text-light border-secondary" name="search" value="{{ search }}" placeholder="Search Tx ID, Customer ID, Merchant...">
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <select class="form-select form-select-sm bg-dark text-light border-secondary" name="status">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Prediction Statuses</option>
+                <option value="Legitimate" {% if status_filter == 'Legitimate' %}selected{% endif %}>Legitimate Only</option>
+                <option value="Suspicious" {% if status_filter == 'Suspicious' %}selected{% endif %}>Suspicious Only</option>
+                <option value="Fraudulent" {% if status_filter == 'Fraudulent' %}selected{% endif %}>Fraudulent Only</option>
+            </select>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <select class="form-select form-select-sm bg-dark text-light border-secondary" name="type">
+                <option value="all" {% if type_filter == 'all' %}selected{% endif %}>All Transaction Types</option>
+                <option value="Online Checkout" {% if type_filter == 'Online Checkout' %}selected{% endif %}>Online Checkout</option>
+                <option value="Wire Transfer" {% if type_filter == 'Wire Transfer' %}selected{% endif %}>Wire Transfer</option>
+                <option value="ATM Withdrawal" {% if type_filter == 'ATM Withdrawal' %}selected{% endif %}>ATM Withdrawal</option>
+                <option value="POS Swipe" {% if type_filter == 'POS Swipe' %}selected{% endif %}>POS Swipe</option>
+                <option value="Mobile Banking" {% if type_filter == 'Mobile Banking' %}selected{% endif %}>Mobile Banking</option>
+            </select>
+        </div>
+
+        <div class="col-12 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm w-100 fw-semibold">Filter</button>
+            <a href="{{ url_for('transactions') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Table -->
+<div class="card bg-navy border-secondary shadow-sm mb-4">
+    <div class="table-responsive">
+        <table class="table table-dark table-hover mb-0 align-middle">
+            <thead class="table-secondary text-uppercase small">
+                <tr>
+                    <th>Tx ID</th>
+                    <th>Customer ID</th>
+                    <th>Amount</th>
+                    <th>Type</th>
+                    <th>Timestamp</th>
+                    <th>Risk Score</th>
+                    <th>Prediction</th>
+                    <th>Risk Level</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in transactions %}
+                <tr>
+                    <td class="font-monospace text-info fw-bold">{{ tx.transaction_id }}</td>
+                    <td class="font-monospace">{{ tx.customer_id }}</td>
+                    <td class="fw-bold">${{ "%.2f"|format(tx.amount) }}</td>
+                    <td><span class="badge bg-dark border border-secondary">{{ tx.transaction_type }}</span></td>
+                    <td class="small text-secondary">{{ tx.transaction_time }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-bold {% if tx.risk_score >= 70 %}text-danger{% elif tx.risk_score >= 35 %}text-warning{% else %}text-success{% endif %}">
+                                {{ tx.risk_score }}
+                            </span>
+                            <div class="progress flex-grow-1 bg-dark" style="height: 6px; width: 50px;">
+                                <div class="progress-bar {% if tx.risk_score >= 70 %}bg-danger{% elif tx.risk_score >= 35 %}bg-warning{% else %}bg-success{% endif %}" 
+                                     style="width: {{ tx.risk_score }}%;"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if tx.prediction == 'Fraudulent' %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger">FRAUDULENT</span>
+                        {% elif tx.prediction == 'Suspicious' %}
+                        <span class="badge bg-warning-subtle text-warning border border-warning">SUSPICIOUS</span>
+                        {% else %}
+                        <span class="badge bg-success-subtle text-success border border-success">LEGITIMATE</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge {% if tx.risk_level == 'High' %}bg-danger{% elif tx.risk_level == 'Medium' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                            {{ tx.risk_level }}
+                        </span>
+                    </td>
+                    <td><small class="text-secondary">{{ tx.status }}</small></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center py-4 text-secondary">
+                        No transactions match your query criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<nav class="d-flex justify-content-between align-items-center">
+    <span class="small text-secondary">Page {{ current_page }} of {{ total_pages }}</span>
+    <ul class="pagination pagination-sm mb-0">
+        <li class="page-item {% if current_page <= 1 %}disabled{% endif %}">
+            <a class="page-link bg-dark text-light border-secondary" href="{{ url_for('transactions', page=current_page-1, search=search, status=status_filter, type=type_filter) }}">Previous</a>
+        </li>
+        <li class="page-item active">
+            <span class="page-link bg-warning text-dark border-warning fw-bold">{{ current_page }}</span>
+        </li>
+        <li class="page-item {% if current_page >= total_pages %}disabled{% endif %}">
+            <a class="page-link bg-dark text-light border-secondary" href="{{ url_for('transactions', page=current_page+1, search=search, status=status_filter, type=type_filter) }}">Next</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
